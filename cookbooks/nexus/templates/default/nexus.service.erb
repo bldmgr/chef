@@ -1,0 +1,16 @@
+# templates/default/nexus.service.erb
+[Unit]
+Description=nexus service
+After=network.target
+
+[Service]
+Type=forking
+LimitNOFILE=65536
+ExecStart=<%= @nexus_home %>/bin/nexus start
+ExecStop=<%= @nexus_home %>/bin/nexus stop
+User=<%= @nexus_user %>
+Restart=on-abort
+TimeoutSec=600
+
+[Install]
+WantedBy=multi-user.target

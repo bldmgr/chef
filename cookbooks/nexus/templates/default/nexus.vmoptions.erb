@@ -1,0 +1,16 @@
+# templates/default/nexus.vmoptions.erb
+-Xms1200m
+-Xmx1200m
+-XX:MaxDirectMemorySize=2g
+-XX:+UnlockExperimentalVMOptions
+-XX:+UseCGroupMemoryLimitForHeap
+-XX:+UseG1GC
+-XX:+UseStringDeduplication
+-Dkaraf.home=.
+-Dkaraf.base=.
+-Dkaraf.etc=etc/karaf
+-Djava.util.logging.config.file=etc/karaf/java.util.logging.properties
+-Dkaraf.data=<%= @data_dir %>/nexus3
+-Dkaraf.log=<%= @data_dir %>/nexus3/log
+-Djava.io.tmpdir=<%= @data_dir %>/nexus3/tmp
+-Dkaraf.startLocalConsole=false
