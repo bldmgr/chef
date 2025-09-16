@@ -78,16 +78,16 @@ end
 #end
 
 # Create systemd service file
-template '/etc/systemd/system/nexus.service' do
-  source 'nexus.service.erb'
-  mode '0644'
-  variables(
-    nexus_user: node['nexus']['user'],
-    nexus_home: node['nexus']['home']
-  )
-  notifies :run, 'execute[systemd_reload]', :immediately
-  notifies :restart, 'service[nexus]', :delayed
-end
+#template '/etc/systemd/system/nexus.service' do
+#  source 'nexus.service.erb'
+#  mode '0644'
+#  variables(
+#    nexus_user: node['nexus']['user'],
+#    nexus_home: node['nexus']['home']
+#  )
+#  notifies :run, 'execute[systemd_reload]', :immediately
+#  notifies :restart, 'service[nexus]', :delayed
+#end
 
 ## Reload systemd
 #execute 'systemd_reload' do
