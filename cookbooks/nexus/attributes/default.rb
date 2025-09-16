@@ -1,6 +1,6 @@
 # attributes/default.rb
 # Nexus version and download settings
-default['nexus']['version'] = '3.45.0-01'
+default['nexus']['version'] = '3.70.4-02'
 default['nexus']['checksum'] = nil # Add checksum for security if needed
 
 # User and group settings
