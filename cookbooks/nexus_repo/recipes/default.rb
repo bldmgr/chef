@@ -1,95 +1,93 @@
 #
-# Cookbook:: nexus
+# Cookbook:: nexus_repo
 # Recipe:: default
 #
-# Copyright:: 2025, bldmgr, All Rights Reserved.
-#
 
-# Default attributes - can be overridden in attributes file or role
-node.default['nexus']['version'] = '3.70.4-02'
-node.default['nexus']['user'] = 'nexus'
-node.default['nexus']['group'] = 'nexus'
-node.default['nexus']['home'] = '/opt/nexus'
-node.default['nexus']['data_dir'] = '/opt/sonatype-work'
-node.default['nexus']['port'] = '8081'
-node.default['nexus']['context_path'] = '/'
-node.default['nexus']['java_opts'] = '-Xms1200m -Xmx1200m -XX:MaxDirectMemorySize=2g'
-
-# Create nexus user and group
-group node['nexus']['group'] do
+# 1. Create nexus group
+group node['nexus_repo']['group'] do
   action :create
 end
 
-user node['nexus']['user'] do
-  group node['nexus']['group']
+# 2. Create nexus user with shell
+user node['nexus_repo']['user'] do
+  comment 'Nexus Repository Manager User'
+  gid node['nexus_repo']['group']
   system true
   shell '/bin/bash'
-  home node['nexus']['home']
+  home node['nexus_repo']['home']
   action :create
 end
 
-# 3. Install Java 11
-package 'java-11-openjdk' do
+# 3. Install Java
+package node['nexus_repo']['java_package'] do
   action :install
 end
 
+# Variables for download
+nexus_tarball = "nexus-#{node['nexus_repo']['version']}-unix.tar.gz"
+nexus_url = "#{node['nexus_repo']['url_base']}/#{nexus_tarball}"
+download_path = "#{node['nexus_repo']['tmp_dir']}/#{nexus_tarball}"
+
 # 4. Download Nexus tarball
-remote_file '/tmp/nexus.tar.gz' do
-  source 'https://download.sonatype.com/nexus/3/nexus-3.70.4-02-unix.tar.gz'
+remote_file download_path do
+  source nexus_url
   action :create
-  notifies :run, 'bash[extract_nexus]', :immediately
 end
 
-# 5. Extract Nexus
+# 5. Create Nexus directories and Extract Nexus
 bash 'extract_nexus' do
-  cwd '/opt'
+  cwd node['nexus_repo']['tmp_dir']
   code <<-EOH
-    tar -xzf /tmp/nexus.tar.gz
-    mv nexus-* nexus
+    mkdir -p #{node['nexus_repo']['home']}
+    tar -xzf #{download_path} -C #{node['nexus_repo']['home']} --strip-components=1
   EOH
-  not_if { ::File.exist?('/opt/nexus') }
-  action :nothing
-  notifies :create, 'file[/opt/nexus/bin/nexus.rc]', :immediately
+  not_if { ::File.exist?("#{node['nexus_repo']['home']}/bin/nexus") }
 end
 
 # 6. Configure nexus.rc
-file '/opt/nexus/bin/nexus.rc' do
-  content 'run_as_user="nexus"'
-  owner 'nexus'
-  group 'nexus'
+template "#{node['nexus_repo']['home']}/bin/nexus.rc" do
+  source 'nexus.rc.erb'
+  owner node['nexus_repo']['user']
+  group node['nexus_repo']['group']
   mode '0644'
-  action :nothing
-  notifies :run, 'bash[chown_nexus]', :immediately
+  variables(
+    nexus_user: node['nexus_repo']['user']
+  )
 end
 
 # 7. Change ownership
 bash 'chown_nexus' do
   code <<-EOH
-    chown -R nexus:nexus /opt/nexus
-    mkdir -p /opt/sonatype-work
-    chown -R nexus:nexus /opt/sonatype-work
+    chown -R #{node['nexus_repo']['user']}:#{node['nexus_repo']['group']} #{node['nexus_repo']['home']}
+    mkdir -p #{node['nexus_repo']['data_dir']}
+    chown -R #{node['nexus_repo']['user']}:#{node['nexus_repo']['group']} #{node['nexus_repo']['data_dir']}
   EOH
-  action :nothing
-  notifies :create, 'template[/etc/systemd/system/nexus.service]', :immediately
 end
 
-# 8. Create systemd service file
-template '/etc/systemd/system/nexus.service' do
+# 8. Modify nexus.vmoptions (comment out endorsed line)
+# This is required for Nexus to run with Java 9+
+ruby_block 'Comment out endorsed dirs in vmoptions' do
+  block do
+    file = Chef::Util::FileEdit.new("#{node['nexus_repo']['home']}/bin/nexus.vmoptions")
+    file.search_file_delete_line(/^.*Djava.endorsed.dirs.*$/)
+    file.write_file
+  end
+  only_if { ::File.exist?("#{node['nexus_repo']['home']}/bin/nexus.vmoptions") }
+  notifies :restart, "service[#{node['nexus_repo']['service_name']}]", :delayed
+end
+
+# 9. Create systemd service file
+template "/etc/systemd/system/#{node['nexus_repo']['service_name']}.service" do
   source 'nexus.service.erb'
   owner 'root'
   group 'root'
   mode '0644'
-  action :nothing
-end
-
-# 9. Modify nexus.vmoptions (comment out endorsed line)
-ruby_block 'Comment out endorsed dirs in vmoptions' do
-  block do
-    file = Chef::Util::FileEdit.new('/opt/nexus/bin/nexus.vmoptions')
-    file.search_file_delete_line(/^.*Djava.endorsed.dirs.*$/)
-    file.write_file
-  end
-  only_if { ::File.exist?('/opt/nexus/bin/nexus.vmoptions') }
+  variables(
+    nexus_user: node['nexus_repo']['user'],
+    nexus_group: node['nexus_repo']['group'],
+    nexus_home: node['nexus_repo']['home']
+  )
+  notifies :run, 'execute[systemctl-daemon-reload]', :immediately
 end
 
 # 10. Install and configure firewalld
@@ -101,9 +99,9 @@ service 'firewalld' do
   action [:enable, :start]
 end
 
-execute 'open-port-8081' do
-  command 'firewall-cmd --add-port=8081/tcp --permanent'
-  not_if 'firewall-cmd --list-ports | grep 8081/tcp'
+execute 'open-nexus-port' do
+  command "firewall-cmd --add-port=#{node['nexus_repo']['port']}/tcp --permanent"
+  not_if "firewall-cmd --list-ports | grep #{node['nexus_repo']['port']}/tcp"
   notifies :run, 'execute[reload-firewalld]', :immediately
 end
 
@@ -113,15 +111,12 @@ execute 'reload-firewalld' do
 end
 
 # 11. Ensure systemd is refreshed before starting Nexus
-execute 'systemctl-daemon-reexec' do
-  command 'systemctl daemon-reexec'
-end
-
 execute 'systemctl-daemon-reload' do
   command 'systemctl daemon-reload'
+  action :nothing
 end
 
 # 12. Enable and start the Nexus service
-service 'nexus' do
+service node['nexus_repo']['service_name'] do
   action [:enable, :start]
 end

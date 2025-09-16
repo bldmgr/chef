@@ -1,26 +1,26 @@
-# attributes/default.rb
+#
+# Cookbook:: nexus_repo
+# Attributes:: default
+#
+
 # Nexus version and download settings
-default['nexus']['version'] = '3.70.4-02'
-default['nexus']['checksum'] = nil # Add checksum for security if needed
+default['nexus_repo']['version'] = '3.70.4-02'
+default['nexus_repo']['url_base'] = 'https://download.sonatype.com/nexus/3'
 
 # User and group settings
-default['nexus']['user'] = 'nexus'
-default['nexus']['group'] = 'nexus'
+default['nexus_repo']['user'] = 'nexus'
+default['nexus_repo']['group'] = 'nexus'
 
 # Directory settings
-default['nexus']['home'] = '/opt/nexus'
-default['nexus']['data_dir'] = '/opt/sonatype-work'
+default['nexus_repo']['home'] = '/opt/nexus'
+default['nexus_repo']['data_dir'] = '/opt/sonatype-work'
+default['nexus_repo']['tmp_dir'] = '/tmp'
+
+# Java settings
+default['nexus_repo']['java_package'] = 'java-11-openjdk'
 
 # Network settings
-default['nexus']['port'] = '8081'
-default['nexus']['host'] = '0.0.0.0'
-default['nexus']['context_path'] = '/'
-
-# JVM settings
-default['nexus']['java_opts'] = '-Xms1200m -Xmx1200m -XX:MaxDirectMemorySize=2g'
+default['nexus_repo']['port'] = '8081'
 
 # Service settings
-default['nexus']['service_timeout'] = 600
-
-# Security settings
-default['nexus']['configure_firewall'] = true
+default['nexus_repo']['service_name'] = 'nexus'
