@@ -15,11 +15,6 @@ node.default['nexus']['port'] = '8081'
 node.default['nexus']['context_path'] = '/'
 node.default['nexus']['java_opts'] = '-Xms1200m -Xmx1200m -XX:MaxDirectMemorySize=2g'
 
-# Install Java (required for Nexus)
-package 'java-11-openjdk' do
-  action :install
-end
-
 # Create nexus user and group
 group node['nexus']['group'] do
   action :create
@@ -31,6 +26,11 @@ user node['nexus']['user'] do
   shell '/bin/bash'
   home node['nexus']['home']
   action :create
+end
+
+# Install Java (required for Nexus)
+package 'java-11-openjdk' do
+  action :install
 end
 
 # Create directories
@@ -59,38 +59,12 @@ end
 execute 'extract_nexus' do
   command <<-EOH
     tar -xzf #{Chef::Config[:file_cache_path]}/#{nexus_package} -C /tmp
-    cp -r /tmp/nexus-#{node['nexus']['version']}/* #{node['nexus']['home']}/
+    mv /tmp/nexus-#{node['nexus']['version']} #{node['nexus']['home']}
     chown -R #{node['nexus']['user']}:#{node['nexus']['group']} #{node['nexus']['home']}
     chown -R #{node['nexus']['user']}:#{node['nexus']['group']} #{node['nexus']['data_dir']}
   EOH
   not_if { ::File.exist?("#{node['nexus']['home']}/bin/nexus") }
 end
-
-## Configure Nexus properties
-#template "#{node['nexus']['home']}/etc/nexus-default.properties" do
-#  source 'nexus-default.properties.erb'
-#  owner node['nexus']['user']
-#  group node['nexus']['group']
-#  mode '0644'
-#  variables(
-#    port: node['nexus']['port'],
-#    context_path: node['nexus']['context_path']
-#  )
-#  notifies :restart, 'service[nexus]', :delayed
-#end
-
-## Configure JVM options
-#template "#{node['nexus']['home']}/bin/nexus.vmoptions" do
-#  source 'nexus.vmoptions.erb'
-#  owner node['nexus']['user']
-#  group node['nexus']['group']
-#  mode '0644'
-#  variables(
-#    java_opts: node['nexus']['java_opts'],
-#    data_dir: node['nexus']['data_dir']
-#  )
-#  notifies :restart, 'service[nexus]', :delayed
-#end
 
 # Create nexus.rc file
 template '/opt/nexus/bin/nexus.rc' do
@@ -133,6 +107,32 @@ service 'nexus' do
   action [:enable, :start]
   supports restart: true, status: true
 end
+
+## Configure Nexus properties
+#template "#{node['nexus']['home']}/etc/nexus-default.properties" do
+#  source 'nexus-default.properties.erb'
+#  owner node['nexus']['user']
+#  group node['nexus']['group']
+#  mode '0644'
+#  variables(
+#    port: node['nexus']['port'],
+#    context_path: node['nexus']['context_path']
+#  )
+#  notifies :restart, 'service[nexus]', :delayed
+#end
+
+## Configure JVM options
+#template "#{node['nexus']['home']}/bin/nexus.vmoptions" do
+#  source 'nexus.vmoptions.erb'
+#  owner node['nexus']['user']
+#  group node['nexus']['group']
+#  mode '0644'
+#  variables(
+#    java_opts: node['nexus']['java_opts'],
+#    data_dir: node['nexus']['data_dir']
+#  )
+#  notifies :restart, 'service[nexus]', :delayed
+#end
 
 ## Wait for Nexus to be ready
 #ruby_block 'wait_for_nexus' do
