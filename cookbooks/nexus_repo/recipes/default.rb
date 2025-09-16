@@ -1,15 +1,13 @@
-# 1. Create nexus group
-group 'nexus' do
+# Create nexus user and group
+group node['nexus']['group'] do
   action :create
 end
 
-# 2. Create nexus user with shell
-user 'nexus' do
-  comment 'Nexus Repository Manager User'
-  gid 'nexus'
+user node['nexus']['user'] do
+  group node['nexus']['group']
   system true
   shell '/bin/bash'
-  home '/opt/nexus'
+  home node['nexus']['home']
   action :create
 end
 
