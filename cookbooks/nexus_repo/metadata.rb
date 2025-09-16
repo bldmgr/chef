@@ -1,0 +1,7 @@
+name 'nexus_repo'
+maintainer 'Rafi'
+maintainer_email 'rakhlaqu@cisco.com'
+license 'All Rights Reserved'
+description 'Installs/Configures Nexus Repository Manager'
+version '0.1.0'
+chef_version '>= 14.0'
