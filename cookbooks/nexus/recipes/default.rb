@@ -67,15 +67,15 @@ execute 'extract_nexus' do
 end
 
 # Create nexus.rc file
-template '/opt/nexus/bin/nexus.rc' do
-  source 'nexus.rc.erb'
-  mode '0644'
-  variables(
-    nexus_user: node['nexus']['user'],
-  )
-  notifies :run, 'execute[systemd_reload]', :immediately
-  notifies :restart, 'service[nexus]', :delayed
-end
+#template '/opt/nexus/bin/nexus.rc' do
+#  source 'nexus.rc.erb'
+#  mode '0644'
+#  variables(
+#    nexus_user: node['nexus']['user'],
+#  )
+#  notifies :run, 'execute[systemd_reload]', :immediately
+#  notifies :restart, 'service[nexus]', :delayed
+#end
 
 # Create systemd service file
 template '/etc/systemd/system/nexus.service' do
