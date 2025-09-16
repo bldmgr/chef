@@ -58,30 +58,16 @@ bash 'chown_nexus' do
   notifies :create, 'template[/etc/systemd/system/nexus.service]', :immediately
 end
 
-# 8. Create systemd service
+# 8. Create systemd service file
 template '/etc/systemd/system/nexus.service' do
   source 'nexus.service.erb'
   owner 'root'
   group 'root'
   mode '0644'
   action :nothing
-  notifies :run, 'execute[systemctl-daemon-reload]', :immediately
 end
 
-# 9. Reload systemd and start nexus
-execute 'systemctl-daemon-reload' do
-  command 'systemctl daemon-reload'
-  action :nothing
-  notifies :enable, 'service[nexus]', :immediately
-  notifies :start, 'service[nexus]', :immediately
-end
-
-# 10. Manage nexus service
-service 'nexus' do
-  action :nothing
-end
-
-# 11. Comment out endorsed line in vmoptions
+# 9. Modify nexus.vmoptions (comment out endorsed line)
 ruby_block 'Comment out endorsed dirs in vmoptions' do
   block do
     file = Chef::Util::FileEdit.new('/opt/nexus/bin/nexus.vmoptions')
@@ -91,7 +77,7 @@ ruby_block 'Comment out endorsed dirs in vmoptions' do
   only_if { ::File.exist?('/opt/nexus/bin/nexus.vmoptions') }
 end
 
-# 12. Install and configure firewall
+# 10. Install and configure firewalld
 package 'firewalld' do
   action :install
 end
@@ -111,7 +97,16 @@ execute 'reload-firewalld' do
   action :nothing
 end
 
-# 13. Reexec systemd (cleanup)
+# 11. Ensure systemd is refreshed before starting Nexus
 execute 'systemctl-daemon-reexec' do
   command 'systemctl daemon-reexec'
+end
+
+execute 'systemctl-daemon-reload' do
+  command 'systemctl daemon-reload'
+end
+
+# 12. Enable and start the Nexus service
+service 'nexus' do
+  action [:enable, :start]
 end
