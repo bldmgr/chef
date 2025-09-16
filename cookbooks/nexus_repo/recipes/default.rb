@@ -1,3 +1,20 @@
+#
+# Cookbook:: nexus
+# Recipe:: default
+#
+# Copyright:: 2025, bldmgr, All Rights Reserved.
+#
+
+# Default attributes - can be overridden in attributes file or role
+node.default['nexus']['version'] = '3.70.4-02'
+node.default['nexus']['user'] = 'nexus'
+node.default['nexus']['group'] = 'nexus'
+node.default['nexus']['home'] = '/opt/nexus'
+node.default['nexus']['data_dir'] = '/opt/sonatype-work'
+node.default['nexus']['port'] = '8081'
+node.default['nexus']['context_path'] = '/'
+node.default['nexus']['java_opts'] = '-Xms1200m -Xmx1200m -XX:MaxDirectMemorySize=2g'
+
 # Create nexus user and group
 group node['nexus']['group'] do
   action :create
