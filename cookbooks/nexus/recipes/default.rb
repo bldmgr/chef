@@ -66,34 +66,47 @@ execute 'extract_nexus' do
   not_if { ::File.exist?("#{node['nexus']['home']}/bin/nexus") }
 end
 
+## Configure JVM options
+template "#{node['nexus']['home']}/bin/nexus.vmoptions" do
+  source 'nexus.vmoptions.erb'
+  owner node['nexus']['user']
+  group node['nexus']['group']
+  mode '0644'
+  variables(
+    java_opts: node['nexus']['java_opts'],
+    data_dir: node['nexus']['data_dir']
+  )
+  notifies :restart, 'service[nexus]', :delayed
+end
+
 # Create nexus.rc file
-#template '/opt/nexus/bin/nexus.rc' do
-#  source 'nexus.rc.erb'
-#  mode '0644'
-#  variables(
-#    nexus_user: node['nexus']['user'],
-#  )
-#  notifies :run, 'execute[systemd_reload]', :immediately
-#  notifies :restart, 'service[nexus]', :delayed
-#end
+template '/opt/nexus/bin/nexus.rc' do
+  source 'nexus.rc.erb'
+  mode '0644'
+  variables(
+    nexus_user: node['nexus']['user'],
+  )
+  notifies :run, 'execute[systemd_reload]', :immediately
+  notifies :restart, 'service[nexus]', :delayed
+end
 
 # Create systemd service file
-#template '/etc/systemd/system/nexus.service' do
-#  source 'nexus.service.erb'
-#  mode '0644'
-#  variables(
-#    nexus_user: node['nexus']['user'],
-#    nexus_home: node['nexus']['home']
-#  )
-#  notifies :run, 'execute[systemd_reload]', :immediately
-#  notifies :restart, 'service[nexus]', :delayed
-#end
+template '/etc/systemd/system/nexus.service' do
+  source 'nexus.service.erb'
+  mode '0644'
+  variables(
+    nexus_user: node['nexus']['user'],
+    nexus_home: node['nexus']['home']
+  )
+  notifies :run, 'execute[systemd_reload]', :immediately
+  notifies :restart, 'service[nexus]', :delayed
+end
 
 ## Reload systemd
-#execute 'systemd_reload' do
-#  command 'systemctl daemon-reload'
-#  action :nothing
-#end
+execute 'systemd_reload' do
+  command 'systemctl daemon-reload'
+  action :nothing
+end
 
 # Configure firewall (if ufw is available)
 execute 'configure_firewall' do
@@ -103,10 +116,10 @@ execute 'configure_firewall' do
 end
 
 # Start and enable Nexus service
-#service 'nexus' do
-#  action [:enable, :start]
-#  supports restart: true, status: true
-#end
+service 'nexus' do
+  action [:enable, :start]
+  supports restart: true, status: true
+end
 
 ## Configure Nexus properties
 #template "#{node['nexus']['home']}/etc/nexus-default.properties" do
@@ -121,18 +134,6 @@ end
 #  notifies :restart, 'service[nexus]', :delayed
 #end
 
-## Configure JVM options
-#template "#{node['nexus']['home']}/bin/nexus.vmoptions" do
-#  source 'nexus.vmoptions.erb'
-#  owner node['nexus']['user']
-#  group node['nexus']['group']
-#  mode '0644'
-#  variables(
-#    java_opts: node['nexus']['java_opts'],
-#    data_dir: node['nexus']['data_dir']
-#  )
-#  notifies :restart, 'service[nexus]', :delayed
-#end
 
 ## Wait for Nexus to be ready
 #ruby_block 'wait_for_nexus' do
