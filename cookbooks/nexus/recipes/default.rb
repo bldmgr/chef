@@ -59,7 +59,7 @@ end
 execute 'extract_nexus' do
   command <<-EOH
     tar -xzf #{Chef::Config[:file_cache_path]}/#{nexus_package} -C /tmp
-    mv /tmp/nexus-#{node['nexus']['version']} #{node['nexus']['home']}
+    find "/tmp/nexus-#{node['nexus']['version']}" -mindepth 1 -maxdepth 1 -exec mv {} "#{node['nexus']['home']}" \;
     chown -R #{node['nexus']['user']}:#{node['nexus']['group']} #{node['nexus']['home']}
     chown -R #{node['nexus']['user']}:#{node['nexus']['group']} #{node['nexus']['data_dir']}
   EOH
@@ -89,11 +89,11 @@ template '/etc/systemd/system/nexus.service' do
   notifies :restart, 'service[nexus]', :delayed
 end
 
-# Reload systemd
-execute 'systemd_reload' do
-  command 'systemctl daemon-reload'
-  action :nothing
-end
+## Reload systemd
+#execute 'systemd_reload' do
+#  command 'systemctl daemon-reload'
+#  action :nothing
+#end
 
 # Configure firewall (if ufw is available)
 execute 'configure_firewall' do
@@ -103,10 +103,10 @@ execute 'configure_firewall' do
 end
 
 # Start and enable Nexus service
-service 'nexus' do
-  action [:enable, :start]
-  supports restart: true, status: true
-end
+#service 'nexus' do
+#  action [:enable, :start]
+#  supports restart: true, status: true
+#end
 
 ## Configure Nexus properties
 #template "#{node['nexus']['home']}/etc/nexus-default.properties" do
