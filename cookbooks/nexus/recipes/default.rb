@@ -59,7 +59,7 @@ end
 execute 'extract_nexus' do
   command <<-EOH
     tar -xzf #{Chef::Config[:file_cache_path]}/#{nexus_package} -C /tmp
-    find "/tmp/nexus-#{node['nexus']['version']}" -mindepth 1 -maxdepth 1 -exec mv {} "#{node['nexus']['home']}";
+    mv "/tmp/nexus-#{node['nexus']['version']}" "#{node['nexus']['home']}"
     chown -R #{node['nexus']['user']}:#{node['nexus']['group']} #{node['nexus']['home']}
     chown -R #{node['nexus']['user']}:#{node['nexus']['group']} #{node['nexus']['data_dir']}
   EOH
