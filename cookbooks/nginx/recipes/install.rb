@@ -22,14 +22,14 @@ case node['nginx']['install_method']
     #include_recipe '::amp_fips'
 end
 
-if amp_feature "lp_42392897_dh_2048_key"
-  cookbook_file '/etc/nginx/dhparams.pem' do
-    source 'dh_pem/dhparams_2048.pem'
-    owner 'nginx'
-    group 'nginx'
-    mode '0440'
-  end
-end
+#if amp_feature "lp_42392897_dh_2048_key"
+#  cookbook_file '/etc/nginx/dhparams.pem' do
+#    source 'dh_pem/dhparams_2048.pem'
+#    owner 'nginx'
+#    group 'nginx'
+#    mode '0440'
+#  end
+#end
 
 execute 'check nginx syntax' do
   command "/usr/sbin/nginx -t -c #{node['nginx']['dir']}/nginx.conf"
