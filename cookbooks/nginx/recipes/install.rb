@@ -10,16 +10,16 @@ case node['nginx']['install_method']
   when 'source'
     raise "Nginx source install was removed as downloading plaintext code is insecure."
   when 'package'
-    case node['platform']
-      when 'redhat','centos','scientific','amazon','oracle'
-        include_recipe 'fireamp-yum::epel'
-    end
+    #case node['platform']
+    #  when 'redhat','centos','scientific','amazon','oracle'
+    #    include_recipe 'fireamp-yum::epel'
+    #end
     package 'nginx'
     service 'nginx' do
       supports :status => true, :restart => true, :reload => true
       action :enable
     end
-    include_recipe '::amp_fips'
+    #include_recipe '::amp_fips'
 end
 
 if amp_feature "lp_42392897_dh_2048_key"
