@@ -1,0 +1,5 @@
+#!/bin/sh
+exec 2>&1
+#set ulimit coredump max size 10% of free space in root partition
+ulimit -c $(($(df /|sed 1d|tr -s ' '|cut -d' ' -f4|tail -n1)/10))
+exec <%= node['nginx']['src_binary'] %> -c <%= node['nginx']['dir'] %>/nginx.conf

@@ -1,0 +1,10 @@
+name: nginx
+title: Nginx
+maintainer: 
+copyright: 
+copyright_email: 
+license: Proprietary
+summary: A Nginx Compliance Profile
+version: 0.1.0
+supports:
+  platform: os
