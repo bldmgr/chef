@@ -16,7 +16,7 @@ end
   depends cb
 end
 
-depends 'fireamp-yum'
+# depends 'fireamp-yum'
 
 %w{ runit bluepill yum }.each do |cb|
   recommends cb
