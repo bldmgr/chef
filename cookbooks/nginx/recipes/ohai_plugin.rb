@@ -24,12 +24,8 @@ ohai "reload_nginx" do
   plugin "nginx"
 end
 
-ohai_plugin_path = if node.el9?
-                     "/etc/chef/ohai/plugins"
-                   else
-                     "/etc/chef/ohai_plugins"
-                   end
-
+ohai_plugin_path = "/etc/chef/ohai/plugins"
+                   
 template "#{ohai_plugin_path}/nginx.rb" do
   source "plugins/nginx.rb.erb"
   owner "root"
