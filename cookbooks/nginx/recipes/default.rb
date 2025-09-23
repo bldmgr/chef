@@ -26,19 +26,19 @@ case node['nginx']['install_method']
     include_recipe 'nginx::commons'
 end
 
-if chef17up?
-  node.default['audit']['compliance_phase'] = true
-  include_profile 'nginx::nginx'
-else
-  control_group "nginx cookbook" do
-    control "default recipe" do
-      it "installs nginx" do
-        expect(package("nginx")).to be_installed
-      end
-      it "runs a service named nginx" do
-        `service nginx status`
-        expect($?).to be_success
-      end
-    end
-  end
+#if chef17up?
+node.default['audit']['compliance_phase'] = true
+include_profile 'nginx::nginx'
+#else
+#  control_group "nginx cookbook" do
+#    control "default recipe" do
+#      it "installs nginx" do
+#        expect(package("nginx")).to be_installed
+#      end
+#      it "runs a service named nginx" do
+#        `service nginx status`
+#        expect($?).to be_success
+#      end
+#    end
+#  end
 end
