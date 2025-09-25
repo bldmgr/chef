@@ -99,10 +99,13 @@ service 'firewalld' do
   action [:enable, :start]
 end
 
-execute 'open-nexus-port' do
-  command "firewall-cmd --add-port=#{node['nexus_repo']['port']}/tcp --permanent"
-  not_if "firewall-cmd --list-ports | grep #{node['nexus_repo']['port']}/tcp"
-  notifies :run, 'execute[reload-firewalld]', :immediately
+# Open firewall ports for Nexus and Docker
+[node['nexus_repo']['port'], node['nexus_repo']['docker_port']].each do |port_to_open|
+  execute "open-firewall-port-#{port_to_open}" do
+    command "firewall-cmd --add-port=#{port_to_open}/tcp --permanent"
+    not_if "firewall-cmd --list-ports | grep -w #{port_to_open}/tcp"
+    notifies :run, 'execute[reload-firewalld]', :immediately
+  end
 end
 
 execute 'reload-firewalld' do
