@@ -69,8 +69,8 @@ end
 ## Configure JVM options. /opt/nexus/bin
 template "#{node['nexus_repo']['home']}/bin/nexus.vmoptions" do
   source 'nexus.vmoptions.erb'
-  owner node['nexus']['user']
-  group node['nexus']['group']
+  owner node['nexus_repo']['user']
+  group node['nexus_repo']['group']
   mode '0644'
   variables(
     data_dir: node['nexus']['data_dir']
