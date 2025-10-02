@@ -66,8 +66,8 @@ end
 
 # 8. Modify nexus.vmoptions (comment out endorsed line)
 # This is required for Nexus to run with Java 9+
-## Configure JVM options
-template "#{node['nexus']['home']}/bin/nexus.vmoptions" do
+## Configure JVM options. /opt/nexus/bin
+template "#{node['nexus_repo']['home']}/bin/nexus.vmoptions" do
   source 'nexus.vmoptions.erb'
   owner node['nexus']['user']
   group node['nexus']['group']
@@ -75,7 +75,6 @@ template "#{node['nexus']['home']}/bin/nexus.vmoptions" do
   variables(
     data_dir: node['nexus']['data_dir']
   )
-  notifies :restart, 'service[nexus]', :delayed
 end
 
 # 9. Create systemd service file
