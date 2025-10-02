@@ -13,8 +13,8 @@ default['nexus_repo']['group'] = 'nexus'
 
 # Directory settings
 default['nexus_repo']['home'] = '/opt/nexus'
-default['nexus_repo']['data_dir'] = '/opt/sonatype-work'
-default['nexus_repo']['tmp_dir'] = '/tmp'
+default['nexus_repo']['data_dir'] = '/data/nexus'
+default['nexus_repo']['tmp_dir'] = '/data/tmp'
 
 # Java settings
 default['nexus_repo']['java_package'] = 'java-11-openjdk'
