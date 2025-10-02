@@ -66,14 +66,16 @@ end
 
 # 8. Modify nexus.vmoptions (comment out endorsed line)
 # This is required for Nexus to run with Java 9+
-ruby_block 'Comment out endorsed dirs in vmoptions' do
-  block do
-    file = Chef::Util::FileEdit.new("#{node['nexus_repo']['home']}/bin/nexus.vmoptions")
-    file.search_file_delete_line(/^.*Djava.endorsed.dirs.*$/)
-    file.write_file
-  end
-  only_if { ::File.exist?("#{node['nexus_repo']['home']}/bin/nexus.vmoptions") }
-  notifies :restart, "service[#{node['nexus_repo']['service_name']}]", :delayed
+## Configure JVM options
+template "#{node['nexus']['home']}/bin/nexus.vmoptions" do
+  source 'nexus.vmoptions.erb'
+  owner node['nexus']['user']
+  group node['nexus']['group']
+  mode '0644'
+  variables(
+    data_dir: node['nexus']['data_dir']
+  )
+  notifies :restart, 'service[nexus]', :delayed
 end
 
 # 9. Create systemd service file
