@@ -73,7 +73,7 @@ template "#{node['nexus_repo']['home']}/bin/nexus.vmoptions" do
   group node['nexus_repo']['group']
   mode '0644'
   variables(
-    data_dir: node['nexus']['data_dir']
+    data_dir: node['nexus_repo']['data_dir']
   )
 end
 
