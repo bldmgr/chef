@@ -78,7 +78,7 @@ template "#{node['nexus_repo']['home']}/bin/nexus.vmoptions" do
 end
 
 
-template "#{node['nexus_repo']['home']}//etc/fabric/nexus-store.properties" do
+template "#{node['nexus_repo']['data_dir']}/etc/fabric/nexus-store.properties" do
   source 'nexus-store.properties.erb'
   owner node['nexus_repo']['user']
   group node['nexus_repo']['group']
