@@ -77,6 +77,17 @@ template "#{node['nexus_repo']['home']}/bin/nexus.vmoptions" do
   )
 end
 
+
+template "#{node['nexus_repo']['home']}//etc/fabric/nexus-store.properties" do
+  source 'nexus-store.properties.erb'
+  owner node['nexus_repo']['user']
+  group node['nexus_repo']['group']
+  mode '0644'
+  variables(
+    data_dir: node['nexus_repo']['data_dir']
+  )
+end
+
 # 9. Create systemd service file
 template "/etc/systemd/system/#{node['nexus_repo']['service_name']}.service" do
   source 'nexus.service.erb'
