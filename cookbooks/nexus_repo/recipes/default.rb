@@ -61,6 +61,8 @@ bash 'chown_nexus' do
     chown -R #{node['nexus_repo']['user']}:#{node['nexus_repo']['group']} #{node['nexus_repo']['home']}
     mkdir -p #{node['nexus_repo']['data_dir']}
     chown -R #{node['nexus_repo']['user']}:#{node['nexus_repo']['group']} #{node['nexus_repo']['data_dir']}
+    mkdir -p #{node['nexus_repo']['data_dir']}/etc/fabric
+    chown -R #{node['nexus_repo']['user']}:#{node['nexus_repo']['group']} #{node['nexus_repo']['data_dir']}/etc/fabric
   EOH
 end
 
