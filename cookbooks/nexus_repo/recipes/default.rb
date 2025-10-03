@@ -65,6 +65,8 @@ bash 'chown_nexus' do
     chown -R #{node['nexus_repo']['user']}:#{node['nexus_repo']['group']} #{node['nexus_repo']['data_dir']}/etc/fabric
     mkdir -p #{node['nexus_repo']['data_dir']}/db_backup
     chown -R #{node['nexus_repo']['user']}:#{node['nexus_repo']['group']} #{node['nexus_repo']['data_dir']}/db_backup
+    mkdir -p #{node['nexus_repo']['data_dir']}/db_backup_pro
+    chown -R #{node['nexus_repo']['user']}:#{node['nexus_repo']['group']} #{node['nexus_repo']['data_dir']}/db_backup_pro 
   EOH
 end
 
